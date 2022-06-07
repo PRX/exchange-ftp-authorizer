@@ -9,6 +9,7 @@ function authorize(connectionParams, username, password) {
   return new Promise((resolve, reject) => {
     if (!username || !password) {
       resolve(false);
+      return;
     }
 
     const connection = mysql.createConnection(connectionParams);
