@@ -7,6 +7,10 @@ const ENV = process.env;
 
 function authorize(connectionParams, username, password) {
   return new Promise((resolve, reject) => {
+    if (!username || !password) {
+      resolve(false);
+    }
+
     const connection = mysql.createConnection(connectionParams);
 
     connection.connect();
