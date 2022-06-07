@@ -114,7 +114,7 @@ exports.handler = async (event) => {
 
     const isAuthed = await authorize(
       dbConnectionParams,
-      event.usernamem,
+      event.username,
       event.password,
     );
 
