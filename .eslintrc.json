@@ -5,6 +5,9 @@
     "node": true,
     "es2021": true
   },
+  "parserOptions": {
+    "sourceType": "module"
+  },
   "rules": {
     "prettier/prettier": ["error"],
     "no-console": 0,
