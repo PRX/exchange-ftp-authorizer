@@ -16,7 +16,7 @@ function authorize(connectionParams, username, password) {
     connection.connect();
 
     connection.query(
-      `SELECT name FROM accounts WHERE delivery_ftp_user = ? AND delivery_ftp_password = ?`,
+      `SELECT name FROM accounts WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL`,
       [username, password],
       function (error, result) {
         if (error) {
