@@ -1,40 +1,26 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
 
 const ssm = new SSMClient({ region: process.env.AWS_REGION });
 
 const ENV = process.env;
 
-function authorize(connectionParams, username, password) {
-  return new Promise((resolve, reject) => {
-    if (!username || !password) {
-      resolve(false);
-      return;
-    }
+async function authorize(connectionParams, username, password) {
+  if (!username || !password) {
+    return false;
+  }
 
-    const connection = mysql.createConnection(connectionParams);
+  const connection = await mysql.createConnection(connectionParams);
+  const [rows, fields] = await connection.execute(
+    "SELECT name FROM `accounts` WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL",
+    [username, password],
+  );
 
-    connection.connect();
+  if (rows.length) {
+    return true;
+  }
 
-    connection.query(
-      `SELECT name FROM accounts WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL`,
-      [username, password],
-      function (error, result) {
-        if (error) {
-          // query error
-          reject(error);
-        } else if (result.length) {
-          // Will only get a result when name/password match the input, so this
-          // is a successful login
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      },
-    );
-
-    connection.end();
-  });
+  return false;
 }
 
 exports.handler = async (event) => {
