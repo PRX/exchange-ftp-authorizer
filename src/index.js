@@ -1,5 +1,5 @@
-import * as mysql from 'mysql';
-import { SSMClient, GetParametersCommand } from '@aws-sdk/client-ssm';
+const mysql = require('mysql');
+const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
 
 const ssm = new SSMClient({ region: process.env.AWS_REGION });
 
