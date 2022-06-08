@@ -11,12 +11,12 @@ async function authorize(connectionParams, username, password) {
   }
 
   const connection = await mysql.createConnection(connectionParams);
-  const [rows, fields] = await connection.execute(
+  const [rows] = await connection.execute(
     "SELECT name FROM `accounts` WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL",
     [username, password],
   );
 
-  if (rows.length) {
+  if (Array.isArray(rows) && rows.length) {
     return true;
   }
 
