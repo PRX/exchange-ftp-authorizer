@@ -1,19 +1,67 @@
-const https = require('https');
-const AWS = require('aws-sdk');
+import * as mysql from 'mysql';
+import { SSMClient, GetParametersCommand } from '@aws-sdk/client-ssm';
 
-const ssm = new AWS.SSM({ apiVersion: '2014-11-06' });
+const ssm = new SSMClient({ region: process.env.AWS_REGION });
 
 const ENV = process.env;
 
+function authorize(connectionParams, username, password) {
+  return new Promise((resolve, reject) => {
+    if (!username || !password) {
+      resolve(false);
+      return;
+    }
+
+    const connection = mysql.createConnection(connectionParams);
+
+    connection.connect();
+
+    connection.query(
+      `SELECT name FROM accounts WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL`,
+      [username, password],
+      function (error, result) {
+        if (error) {
+          // query error
+          reject(error);
+        } else if (result.length) {
+          // Will only get a result when name/password match the input, so this
+          // is a successful login
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      },
+    );
+
+    connection.end();
+  });
+}
+
 exports.handler = async (event) => {
   // TODO Move outside of handler for better performance
-  const param = await ssm
-    .getParameter({
-      Name: ENV.FTP_AUTH_TOKEN_PARAMETER_ARN.split(':parameter')[1],
+  const params = await ssm.send(
+    new GetParametersCommand({
+      Names: [
+        ENV.DB_NAME_PARAMETER_ARN.split(':parameter')[1],
+        ENV.DB_USERNAME_PARAMETER_ARN.split(':parameter')[1],
+        ENV.DB_PASSWORD_PARAMETER_ARN.split(':parameter')[1],
+      ],
       WithDecryption: true,
-    })
-    .promise();
-  const token = param.Parameter.Value;
+    }),
+  );
+
+  const dbConnectionParams = {
+    host: ENV.MYSQL_ENDPOINT,
+    database: params.Parameters.find(
+      (p) => p.ARN === ENV.DB_NAME_PARAMETER_ARN,
+    ),
+    user: params.Parameters.find(
+      (p) => p.ARN === ENV.DB_USERNAME_PARAMETER_ARN,
+    ),
+    password: params.Parameters.find(
+      (p) => p.ARN === ENV.DB_PASSWORD_PARAMETER_ARN,
+    ),
+  };
 
   const bucketName = ENV.S3_BUCKET_ARN.split(':')[5];
 
@@ -65,36 +113,11 @@ exports.handler = async (event) => {
   if (event.password?.length) {
     // Password-based authentication for FTP and SFTP
 
-    const isAuthed = await new Promise((resolve, reject) => {
-      const body = JSON.stringify({
-        token,
-        user: event.username,
-        password: event.password,
-      });
-
-      const req = https
-        .request(
-          {
-            host: ENV.EXCHANGE_HOSTNAME,
-            path: '/ftp/auth',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': Buffer.byteLength(body),
-            },
-          },
-          (r) => {
-            r.on('data', () => {});
-            r.on('end', () =>
-              r.statusCode === 200 ? resolve(true) : resolve(false),
-            );
-          },
-        )
-        .on('error', reject);
-
-      req.write(body);
-      req.end();
-    });
+    const isAuthed = await authorize(
+      dbConnectionParams,
+      event.username,
+      event.password,
+    );
 
     if (isAuthed) {
       console.log('Password OK');
