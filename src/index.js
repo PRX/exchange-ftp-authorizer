@@ -38,15 +38,13 @@ exports.handler = async (event) => {
 
   const dbConnectionParams = {
     host: ENV.MYSQL_ENDPOINT,
-    database: params.Parameters.find(
-      (p) => p.ARN === ENV.DB_NAME_PARAMETER_ARN,
-    ),
-    user: params.Parameters.find(
-      (p) => p.ARN === ENV.DB_USERNAME_PARAMETER_ARN,
-    ),
+    database: params.Parameters.find((p) => p.ARN === ENV.DB_NAME_PARAMETER_ARN)
+      .Value,
+    user: params.Parameters.find((p) => p.ARN === ENV.DB_USERNAME_PARAMETER_ARN)
+      .Value,
     password: params.Parameters.find(
       (p) => p.ARN === ENV.DB_PASSWORD_PARAMETER_ARN,
-    ),
+    ).Value,
   };
 
   const bucketName = ENV.S3_BUCKET_ARN.split(':')[5];
