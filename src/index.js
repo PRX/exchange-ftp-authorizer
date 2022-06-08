@@ -1,4 +1,4 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const AWS = require('aws-sdk');
 
 const ssm = new AWS.SSM({ apiVersion: '2014-11-06' });
