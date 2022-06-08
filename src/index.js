@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
-const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
+const AWS = require('aws-sdk');
 
-const ssm = new SSMClient({ region: process.env.AWS_REGION });
+const ssm = new AWS.SSM({ apiVersion: '2014-11-06' });
 
 const ENV = process.env;
 
@@ -25,16 +25,16 @@ async function authorize(connectionParams, username, password) {
 
 exports.handler = async (event) => {
   // TODO Move outside of handler for better performance
-  const params = await ssm.send(
-    new GetParametersCommand({
+  const params = await ssm
+    .getParameters({
       Names: [
         ENV.DB_NAME_PARAMETER_ARN.split(':parameter')[1],
         ENV.DB_USERNAME_PARAMETER_ARN.split(':parameter')[1],
         ENV.DB_PASSWORD_PARAMETER_ARN.split(':parameter')[1],
       ],
       WithDecryption: true,
-    }),
-  );
+    })
+    .promise();
 
   const dbConnectionParams = {
     host: ENV.MYSQL_ENDPOINT,

@@ -7,10 +7,10 @@
     "url": "git://github.com/PRX/exchange-ftp-authorizer.git"
   },
   "dependencies": {
-		"@aws-sdk/client-ssm": "3.x",
 		"mysql2": "^2.3.3"
   },
   "devDependencies": {
+    "aws-sdk": "2.x",
     "@types/aws-lambda": "*",
     "@types/node": "*",
     "eslint": "*",
