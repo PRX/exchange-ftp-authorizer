@@ -15,6 +15,7 @@ async function authorize(connectionParams, username, password) {
     "SELECT name FROM `accounts` WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL",
     [username, password],
   );
+  connection.end();
 
   if (Array.isArray(rows) && rows.length) {
     return true;
