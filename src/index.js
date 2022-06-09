@@ -37,10 +37,9 @@ async function authorize(connectionParams, username, password) {
   return false;
 }
 
-exports.handler = async (event) => {
-  // TODO Move outside of handler for better performance
-  console.log('Getting SSM parameters');
-  const params = await ssm
+const initializeParams = async () => {
+  console.log('Initializing SSM params');
+  return ssm
     .getParameters({
       Names: [
         ENV.DB_NAME_PARAMETER_ARN.split(':parameter')[1],
@@ -50,6 +49,13 @@ exports.handler = async (event) => {
       WithDecryption: true,
     })
     .promise();
+};
+
+const getParams = initializeParams();
+
+exports.handler = async (event) => {
+  console.log('Getting SSM parameters');
+  const params = await getParams;
   console.log('Done getting SSM parameters');
 
   const dbConnectionParams = {
