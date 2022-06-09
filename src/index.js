@@ -1,7 +1,15 @@
 const mysql = require('mysql2/promise');
 const AWS = require('aws-sdk');
 
-const ssm = new AWS.SSM({ apiVersion: '2014-11-06' });
+const ssm = new AWS.SSM({
+  apiVersion: '2014-11-06',
+  httpOptions: {
+    connectTimeout: 1000, // milliseconds
+    timeout: 2000, // milliseconds
+  },
+  maxRetries: 5,
+  retryDelayOptions: { base: 1100 },
+});
 
 const ENV = process.env;
 
