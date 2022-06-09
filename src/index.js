@@ -10,11 +10,16 @@ async function authorize(connectionParams, username, password) {
     return false;
   }
 
+  console.log('Creating MySQL connection');
   const connection = await mysql.createConnection(connectionParams);
+  console.log('Done creating MySQL connection');
+
+  console.log('Running MySQL query');
   const [rows] = await connection.execute(
     "SELECT name FROM `accounts` WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL",
     [username, password],
   );
+  console.log('Done running MySQL query');
   connection.end();
 
   if (Array.isArray(rows) && rows.length) {
@@ -26,6 +31,7 @@ async function authorize(connectionParams, username, password) {
 
 exports.handler = async (event) => {
   // TODO Move outside of handler for better performance
+  console.log('Getting SSM parameters');
   const params = await ssm
     .getParameters({
       Names: [
@@ -36,6 +42,7 @@ exports.handler = async (event) => {
       WithDecryption: true,
     })
     .promise();
+  console.log('Done getting SSM parameters');
 
   const dbConnectionParams = {
     host: ENV.MYSQL_ENDPOINT,
