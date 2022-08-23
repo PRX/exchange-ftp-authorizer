@@ -13,3 +13,4 @@ Events are recoded to a Kinesis data stream.
 ### writer.js
 
 A second Lambda function is triggered by that Kinesis data stream. It reads event data in batches, and writes them out, one event per line, to text files in a file system intended to be processed by [The Castle](https://github.com/PRX/TheCastle).
+
