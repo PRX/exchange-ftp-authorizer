@@ -18,6 +18,6 @@ phases:
       - docker build .
   post_build:
     commands:
-      - 'curl -sO "https://raw.githubusercontent.com/PRX/Infrastructure/master/ci/utility/post_build.sh"'
+      - curl -sO "https://raw.githubusercontent.com/PRX/Infrastructure/main/ci/utility/post_build.sh"
       - chmod +x post_build.sh
       - . ./post_build.sh
