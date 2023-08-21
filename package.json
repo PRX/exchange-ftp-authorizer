@@ -1,13 +1,13 @@
 {
   "name": "exchange-ftp-authorizer",
   "version": "1.0.0",
-  "license": "GPL-3.0-only",
+  "license": "AGPL-3.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/PRX/exchange-ftp-authorizer.git"
   },
   "dependencies": {
-		"mysql2": "^2.3.3"
+		"mysql2": "^3.6.0"
   },
   "devDependencies": {
     "aws-sdk": "2.x",

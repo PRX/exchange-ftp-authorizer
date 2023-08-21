@@ -10,7 +10,8 @@ RUN apk add zip
 RUN mkdir --parents /.prxci
 
 ADD package.json ./
-RUN npm install --only=production
+ADD yarn.lock ./
+RUN yarn install --production=true
 
 ADD src/index.js .
 
