@@ -1,10 +1,12 @@
 import { createConnection } from 'mysql2/promise';
-import { SSM, GetParametersCommand } from '@aws-sdk/client-ssm';
+import { SSMClient, GetParametersCommand } from '@aws-sdk/client-ssm';
 import { ConfiguredRetryStrategy } from '@aws-sdk/util-retry';
 
-const ssm = new SSM({
+const ssm = new SSMClient({
   apiVersion: '2014-11-06',
   retryStrategy: new ConfiguredRetryStrategy(6, 1100),
+  // TODO Shoud also set connectTimeout=1000 and timeout=2000, but couldn't get
+  // it working with SDK v3 using requestHandler
 });
 
 const ENV = process.env;
