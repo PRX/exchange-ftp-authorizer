@@ -35,7 +35,7 @@ async function authorize(connectionParams, username, password) {
   return false;
 }
 
-const initializeParams = async () => {
+async function initializeParams() {
   console.log('Initializing SSM params');
 
   return ssm.send(
@@ -48,13 +48,13 @@ const initializeParams = async () => {
       WithDecryption: true,
     }),
   );
-};
+}
 
-const getParams = initializeParams();
+const getParams = await initializeParams();
 
 export const handler = async (event) => {
   console.log('Getting SSM parameters');
-  const params = await getParams;
+  const params = getParams;
   console.log('Done getting SSM parameters');
 
   const dbConnectionParams = {
