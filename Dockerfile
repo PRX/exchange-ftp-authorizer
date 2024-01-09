@@ -13,7 +13,7 @@ ADD package.json ./
 ADD yarn.lock ./
 RUN yarn install --production=true
 
-ADD src/index.js .
+ADD src/index.mjs .
 
 # This zip file is what will be deployed to the Lambda function.
 # Add any necessary files to it.
