@@ -52,7 +52,7 @@ const initializeParams = async () => {
 
 const getParams = initializeParams();
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   console.log('Getting SSM parameters');
   const params = await getParams;
   console.log('Done getting SSM parameters');
