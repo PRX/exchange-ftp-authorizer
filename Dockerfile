@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 LABEL maintainer="PRX <sysadmin@prx.org>"
 LABEL org.prx.spire.publish.s3="LAMBDA_ZIP"

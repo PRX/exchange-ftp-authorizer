@@ -1,1 +1,1 @@
-nodejs 16.19.1 # Should match the AWS Lambda runtime being used
+nodejs 18.19.0 # Should match the AWS Lambda runtime being used
