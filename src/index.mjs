@@ -1,14 +1,10 @@
-const mysql = require('mysql2/promise');
-const AWS = require('aws-sdk');
+import { createConnection } from 'mysql2/promise';
+import { SSM, GetParametersCommand } from '@aws-sdk/client-ssm';
+import { ConfiguredRetryStrategy } from '@aws-sdk/util-retry';
 
-const ssm = new AWS.SSM({
+const ssm = new SSM({
   apiVersion: '2014-11-06',
-  httpOptions: {
-    connectTimeout: 1000, // milliseconds
-    timeout: 2000, // milliseconds
-  },
-  maxRetries: 5,
-  retryDelayOptions: { base: 1100 },
+  retryStrategy: new ConfiguredRetryStrategy(6, 1100),
 });
 
 const ENV = process.env;
@@ -19,7 +15,7 @@ async function authorize(connectionParams, username, password) {
   }
 
   console.log('Creating MySQL connection');
-  const connection = await mysql.createConnection(connectionParams);
+  const connection = await createConnection(connectionParams);
   console.log('Done creating MySQL connection');
 
   console.log('Running MySQL query');
@@ -39,16 +35,17 @@ async function authorize(connectionParams, username, password) {
 
 const initializeParams = async () => {
   console.log('Initializing SSM params');
-  return ssm
-    .getParameters({
+
+  return ssm.send(
+    new GetParametersCommand({
       Names: [
         ENV.DB_NAME_PARAMETER_ARN.split(':parameter')[1],
         ENV.DB_USERNAME_PARAMETER_ARN.split(':parameter')[1],
         ENV.DB_PASSWORD_PARAMETER_ARN.split(':parameter')[1],
       ],
       WithDecryption: true,
-    })
-    .promise();
+    }),
+  );
 };
 
 const getParams = initializeParams();

@@ -11,6 +11,8 @@
   },
   "devDependencies": {
     "aws-sdk": "2.x",
+    "@aws-sdk/client-ssm": "*",
+    "@aws-sdk/util-retry": "*",
     "@types/aws-lambda": "*",
     "@types/node": "*",
     "eslint": "*",
