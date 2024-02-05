@@ -1,0 +1,7 @@
+name: Check project standards
+
+on: push
+
+jobs:
+  check-javascript:
+    uses: prx/.github/.github/workflows/check-project-std-javascript.yml@main
