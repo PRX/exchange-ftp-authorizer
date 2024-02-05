@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "license": "AGPL-3.0",
   "type": "module",
+  "private": "true",
+  "engines": {
+    "node": ">= 20.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/PRX/exchange-ftp-authorizer.git"
