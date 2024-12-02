@@ -5,7 +5,7 @@
   "type": "module",
   "private": "true",
   "engines": {
-    "node": ">= 20.0.0"
+    "node": ">= 22.0.0"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@aws-sdk/client-ssm": "*",
     "@aws-sdk/util-retry": "*",
+    "@aws-sdk/node-http-handler": "*",
     "@types/aws-lambda": "*",
     "@types/node": "*",
     "eslint": "*",
