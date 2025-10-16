@@ -1,7 +1,7 @@
+import { GetParametersCommand, SSMClient } from "@aws-sdk/client-ssm";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
+import { ConfiguredRetryStrategy } from "@smithy/util-retry";
 import { createConnection } from "mysql2/promise";
-import { SSMClient, GetParametersCommand } from "@aws-sdk/client-ssm";
-import { ConfiguredRetryStrategy } from "@aws-sdk/util-retry";
-import { NodeHttpHandler } from "@aws-sdk/node-http-handler";
 
 const retryStrategy = new ConfiguredRetryStrategy(
   6, // Max attempts

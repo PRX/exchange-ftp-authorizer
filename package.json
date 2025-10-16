@@ -12,19 +12,15 @@
     "url": "git://github.com/PRX/exchange-ftp-authorizer.git"
   },
   "dependencies": {
+    "@aws-sdk/client-ssm": "^3.911.0",
+    "@smithy/util-retry": "^4.2.3",
+    "@smithy/node-http-handler": "^4.4.2",
     "mysql2": "^3.6.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-ssm": "*",
-    "@aws-sdk/util-retry": "*",
-    "@aws-sdk/node-http-handler": "*",
+    "@biomejs/biome": "*",
     "@types/aws-lambda": "*",
     "@types/node": "*",
-    "eslint": "*",
-    "eslint-config-airbnb-base": "*",
-    "eslint-config-prettier": "*",
-    "eslint-plugin-import": "*",
-    "eslint-plugin-prettier": "*",
     "prettier": "*",
     "typescript": "*"
   }
