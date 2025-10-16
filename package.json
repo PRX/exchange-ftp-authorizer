@@ -21,7 +21,6 @@
     "@biomejs/biome": "*",
     "@types/aws-lambda": "*",
     "@types/node": "*",
-    "prettier": "*",
     "typescript": "*"
   }
 }
