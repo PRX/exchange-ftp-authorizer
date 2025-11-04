@@ -74,7 +74,6 @@ export const handler = async (event) => {
 
     if (isAuthed) {
       const isRateLimited = await checkRateLimit(event.username);
-      console.log(`Is rate limited? ${isRateLimited}`);
 
       if (isRateLimited) {
         // send slack message
@@ -82,13 +81,13 @@ export const handler = async (event) => {
           new PutEventsCommand({
             Entries: [
               {
-                Source: "org.prx.spire.ftp-auth",
+                Source: "org.prx.spire.exchange-ftp-authorizer",
                 DetailType: "Slack Message Relay Message Payload",
                 Detail: JSON.stringify({
                   channel: "#sandbox2",
                   username: "nobody",
-                  icon_emoji: ":ghost:",
-                  text: "rate limit",
+                  icon_emoji: ":abacus:",
+                  text: `*${event.username}* has connected, but would have been rate limited`,
                 }),
               },
             ],
