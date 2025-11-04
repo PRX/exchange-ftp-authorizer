@@ -84,8 +84,8 @@ export const handler = async (event) => {
                 Source: "org.prx.spire.exchange-ftp-authorizer",
                 DetailType: "Slack Message Relay Message Payload",
                 Detail: JSON.stringify({
-                  channel: "#sandbox2",
-                  username: "nobody",
+                  channel: "#tech-ftp-rate-limit-testing",
+                  username: "FTP Rate Limiting",
                   icon_emoji: ":abacus:",
                   text: `*${event.username}* has connected, but would have been rate limited`,
                 }),
