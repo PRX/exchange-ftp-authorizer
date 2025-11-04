@@ -1,7 +1,13 @@
+import {
+  EventBridgeClient,
+  PutEventsCommand,
+} from "@aws-sdk/client-eventbridge";
 import { GetParametersCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import { ConfiguredRetryStrategy } from "@smithy/util-retry";
-import { createConnection } from "mysql2/promise";
+import checkCredentials from "./credentials.js";
+import checkRateLimit from "./rate_limit.js";
+import transferAuth from "./transfer_auth.js";
 
 const retryStrategy = new ConfiguredRetryStrategy(
   6, // Max attempts
@@ -20,31 +26,9 @@ const ssm = new SSMClient({
   requestHandler,
 });
 
+const eventbridge = new EventBridgeClient();
+
 const ENV = process.env;
-
-async function authorize(connectionParams, username, password) {
-  if (!username || !password) {
-    return false;
-  }
-
-  console.log("Creating MySQL connection");
-  const connection = await createConnection(connectionParams);
-  console.log("Done creating MySQL connection");
-
-  console.log("Running MySQL query");
-  const [rows] = await connection.execute(
-    "SELECT name FROM `accounts` WHERE delivery_ftp_user = ? AND delivery_ftp_password = ? AND type = 'StationAccount' AND status = 'open' AND deleted_at is NULL",
-    [username, password],
-  );
-  console.log("Done running MySQL query");
-  connection.end();
-
-  if (Array.isArray(rows) && rows.length) {
-    return true;
-  }
-
-  return false;
-}
 
 async function initializeParams() {
   console.log("Initializing SSM params");
@@ -79,65 +63,40 @@ export const handler = async (event) => {
     ).Value,
   };
 
-  const bucketName = ENV.S3_BUCKET_ARN.split(":")[5];
-
-  const userPolicy = {
-    Statement: [
-      {
-        Action: ["s3:ListBucket"],
-        Condition: {
-          StringLike: {
-            "s3:prefix": [event.username, `${event.username}/*`],
-          },
-        },
-        Effect: "Allow",
-        Resource: [ENV.S3_BUCKET_ARN],
-        Sid: "AllowBucketUserPrefixReadOnly",
-      },
-      {
-        Action: [
-          "s3:GetObject",
-          "s3:GetObjectAttributes",
-          "s3:GetObjectVersion",
-          "s3:GetObjectVersionAttributes",
-        ],
-        Effect: "Allow",
-        Resource: [`${ENV.S3_BUCKET_ARN}/*`],
-        Sid: "AllowObjectUserPrefixReadOnly",
-      },
-    ],
-    Version: "2012-10-17",
-  };
-
-  const authorization = {
-    Role: ENV.FTP_USER_ACCESS_ROLE,
-    Policy: JSON.stringify(userPolicy),
-    HomeDirectoryType: "LOGICAL",
-    HomeDirectoryDetails: JSON.stringify([
-      {
-        // Exposes the contents of a folder in S3 as the root file
-        // system for the user's session. Examples do not include a
-        // trailing slash. If wxyz/audio.mp2 exists in the bucket,
-        // when wxyz logs in they will see audio.mp2 in the root of
-        // the FTP server.
-        Entry: `/`,
-        Target: `/${bucketName}/${event.username}`,
-      },
-    ]),
-  };
-
   if (event.password?.length) {
     // Password-based authentication for FTP and SFTP
 
-    const isAuthed = await authorize(
+    const isAuthed = await checkCredentials(
       dbConnectionParams,
       event.username,
       event.password,
     );
 
     if (isAuthed) {
+      const isRateLimited = await checkRateLimit(event.username);
+
+      if (isRateLimited) {
+        // send slack message
+        await eventbridge.send(
+          new PutEventsCommand({
+            Entries: [
+              {
+                Source: "org.prx.spire.exchange-ftp-authorizer",
+                DetailType: "Slack Message Relay Message Payload",
+                Detail: JSON.stringify({
+                  channel: "#sandbox2",
+                  username: "nobody",
+                  icon_emoji: ":abacus:",
+                  text: `*${event.username}* has connected, but would have been rate limited`,
+                }),
+              },
+            ],
+          }),
+        );
+      }
+
       console.log("Password OK");
-      return authorization;
+      return transferAuth(event.username, process.env.S3_BUCKET_ARN);
     } else {
       console.log("Bad password");
       return {};
