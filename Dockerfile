@@ -14,6 +14,9 @@ ADD yarn.lock ./
 RUN yarn install --production=true
 
 ADD src/index.js .
+ADD src/credentials.js .
+ADD src/rate_limit.js .
+ADD src/transfer_auth.js .
 
 # This zip file is what will be deployed to the Lambda function.
 # Add any necessary files to it.
