@@ -76,7 +76,6 @@ export const handler = async (event) => {
       const isRateLimited = await checkRateLimit(event.username);
 
       if (isRateLimited) {
-        // send slack message
         await eventbridge.send(
           new PutEventsCommand({
             Entries: [
@@ -84,28 +83,31 @@ export const handler = async (event) => {
                 Source: "org.prx.spire.exchange-ftp-authorizer",
                 DetailType: "Slack Message Relay Message Payload",
                 Detail: JSON.stringify({
-                  channel: "#tech-ftp-rate-limit-testing",
+                  channel: "C09QPRSMMU5",
                   username: "FTP Rate Limiting",
                   icon_emoji: ":abacus:",
-                  text: `*${event.username}* has connected, but would have been rate limited`,
+                  text: `❌ *${event.username}* has been rate limited; a connection attempt was denied.`,
                 }),
               },
             ],
           }),
         );
+
+        console.log(`${event.username}: Password OK, rate limit DENIED`);
+        return {}; // Returning an empty object here prevents the login
       }
 
-      console.log("Password OK");
+      console.log(`${event.username}: Password OK, rate limit OK`);
       return transferAuth(event.username, process.env.S3_BUCKET_ARN);
     } else {
-      console.log("Bad password");
+      console.log(`${event.username}: Password DENIED`);
       return {};
     }
     // } else if (event.protocol === 'SFTP') {
     // Key-based authentication for SFTP
   } else {
     // Invalid authentication; do not return any policy
-    console.log("Bad login");
+    console.log(`${event.username}: Authentication method INVALID`);
     return {};
   }
 };
