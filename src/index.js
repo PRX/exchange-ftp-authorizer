@@ -75,7 +75,7 @@ export const handler = async (event) => {
     if (isAuthed) {
       const isRateLimited = await checkRateLimit(event.username);
 
-      if (isRateLimited) {
+      if (isRateLimited && !["kuaf"].includes(event.username)) {
         await eventbridge.send(
           new PutEventsCommand({
             Entries: [
