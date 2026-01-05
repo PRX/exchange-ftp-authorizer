@@ -86,7 +86,7 @@ export const handler = async (event) => {
                   channel: "C09QPRSMMU5",
                   username: "FTP Rate Limiting",
                   icon_emoji: ":abacus:",
-                  text: `❌ *${event.username}* has been rate limited; a connection attempt was denied.`,
+                  text: `❌ *${event.username}* has been rate limited; a connection attempt was denied. (${process.env.AWS_REGION})`,
                 }),
               },
             ],
