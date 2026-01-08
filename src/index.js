@@ -11,7 +11,7 @@ import transferAuth from "./transfer_auth.js";
 
 // List of stations where Slack messages should not be sampled at 100%.
 // `wxyz: 50` means to sample at (1 / 50) for WXYZ.
-const SAMPLE_RATES = { kuaf: 50 };
+const SAMPLE_RATES = { kuaf: 50, kuat: 20 };
 
 const retryStrategy = new ConfiguredRetryStrategy(
   6, // Max attempts
