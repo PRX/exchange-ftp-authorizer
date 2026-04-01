@@ -1,3 +1,8 @@
+/**
+ * @param {string} username
+ * @param {string} bucketArn
+ * @returns {object}
+ */
 function userPolicy(username, bucketArn) {
   return {
     Statement: [
@@ -28,6 +33,11 @@ function userPolicy(username, bucketArn) {
   };
 }
 
+/**
+ * @param {string} username
+ * @param {string} bucketArn
+ * @returns {object}
+ */
 export default function authorization(username, bucketArn) {
   const bucketName = bucketArn.split(":")[5];
 

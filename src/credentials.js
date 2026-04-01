@@ -1,5 +1,11 @@
 import { createConnection } from "mysql2/promise";
 
+/**
+ * @param {any} connectionParams
+ * @param {string} username
+ * @param {string} password
+ * @returns
+ */
 export default async function authorize(connectionParams, username, password) {
   if (!username || !password) {
     return false;
