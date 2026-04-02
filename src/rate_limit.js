@@ -33,7 +33,13 @@ const BUCKET_MAX_BYTES = 10_000_000_000; // 10 GB
 // reasonable approximation of what they may download once they connect.
 const FUDGE_BYTES = 150_000_000 * 3;
 
-// Returns the query input to send to CloudWatch Metrics `GetMetricData`
+/**
+ * Returns the query input to send to CloudWatch Metrics `GetMetricData`
+ * @param {string} username
+ * @param {Date} startTime
+ * @param {Date} endTime
+ * @returns {object}
+ */
 function metricQueryInput(username, startTime, endTime) {
   return {
     MetricDataQueries: [
@@ -65,13 +71,16 @@ function metricQueryInput(username, startTime, endTime) {
   };
 }
 
+/**
+ * @param {string} username
+ * @returns {Promise<boolean>}
+ */
 export default async function checkUsage(username) {
   const startTime = new Date(Date.now() - 1000 * NUM_PERIODS * PERIOD);
   const endTime = new Date(Date.now());
 
   const getMetricDataInput = metricQueryInput(username, startTime, endTime);
 
-  // @ts-expect-error
   const metricDataCmd = new GetMetricDataCommand(getMetricDataInput);
 
   // This will be an array of objects like:

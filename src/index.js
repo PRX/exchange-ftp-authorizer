@@ -34,6 +34,11 @@ const eventbridge = new EventBridgeClient();
 
 const ENV = process.env;
 
+/**
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
 function rand(min, max) {
   const minCeiled = Math.ceil(min);
   return Math.floor(
@@ -58,6 +63,9 @@ async function initializeParams() {
 
 const getParams = await initializeParams();
 
+/**
+ * @param {any} event
+ */
 export const handler = async (event) => {
   console.log("Getting SSM parameters");
   const params = getParams;
