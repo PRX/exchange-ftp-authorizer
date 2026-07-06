@@ -12,6 +12,7 @@ import transferAuth from "./transfer_auth.js";
 // List of stations where Slack messages should not be sampled at 100%.
 // `wxyz: 50` means to sample at (1 / 50) for WXYZ.
 const SAMPLE_RATES = { kuaf: 50, kuat: 20, redriver: 15 };
+const SILENCED = ["redriver", "will"];
 
 const retryStrategy = new ConfiguredRetryStrategy(
   6, // Max attempts
@@ -104,7 +105,9 @@ export const handler = async (event) => {
         // with a 100% sample rate (i.e., every rate limiting event). For
         // stations with a sample rate override, it should only message at a
         // rate of about 1/the_override_rate.
-        if (rand(1, sample_rate) === 1) {
+        //
+        // Some stations we silence entirely.
+        if (rand(1, sample_rate) === 1 && !SILENCED.includes(event.username)) {
           const username = `FTP Rate Limiting${isSampled ? ` (Sampled at 1 per ${sample_rate})` : ""}`;
 
           await eventbridge.send(
