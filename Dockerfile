@@ -17,6 +17,7 @@ ADD src/index.js .
 ADD src/credentials.js .
 ADD src/rate_limit.js .
 ADD src/transfer_auth.js .
+ADD src/capture.js .
 
 # This zip file is what will be deployed to the Lambda function.
 # Add any necessary files to it.
