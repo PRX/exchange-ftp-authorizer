@@ -129,11 +129,14 @@ export const handler = async (_event) => {
 
     for (const row of rows) {
       // biome-ignore lint/complexity/useLiteralKeys: row isn't a regular object, dot notation would work by TS complains
-      map[row["delivery_ftp_user"]] = encrypt(
+      if (row["delivery_ftp_password"]) {
         // biome-ignore lint/complexity/useLiteralKeys: row isn't a regular object, dot notation would work by TS complains
-        row["delivery_ftp_password"],
-        secret,
-      );
+        map[row["delivery_ftp_user"]] = encrypt(
+          // biome-ignore lint/complexity/useLiteralKeys: row isn't a regular object, dot notation would work by TS complains
+          row["delivery_ftp_password"],
+          secret,
+        );
+      }
     }
 
     const upload = new Upload({
