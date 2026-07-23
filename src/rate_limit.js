@@ -1,3 +1,5 @@
+/** @import { GetMetricDataCommandInput } from "@aws-sdk/client-cloudwatch" */
+
 import {
   CloudWatchClient,
   GetMetricDataCommand,
@@ -38,7 +40,7 @@ const FUDGE_BYTES = 150_000_000 * 3;
  * @param {string} username
  * @param {Date} startTime
  * @param {Date} endTime
- * @returns {object}
+ * @returns {GetMetricDataCommandInput}
  */
 function metricQueryInput(username, startTime, endTime) {
   return {

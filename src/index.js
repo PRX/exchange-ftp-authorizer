@@ -1,96 +1,32 @@
+/** @import { TransferFamilyAuthorizerEvent, TransferFamilyAuthorizerResult } from "aws-lambda" */
+
 import {
   EventBridgeClient,
   PutEventsCommand,
 } from "@aws-sdk/client-eventbridge";
-import { GetParametersCommand, SSMClient } from "@aws-sdk/client-ssm";
-import { NodeHttpHandler } from "@smithy/node-http-handler";
-import { ConfiguredRetryStrategy } from "@smithy/util-retry";
 import checkCredentials from "./credentials.js";
 import checkRateLimit from "./rate_limit.js";
 import transferAuth from "./transfer_auth.js";
+import { msg, rand, redact } from "./util.js";
 
 // List of stations where Slack messages should not be sampled at 100%.
 // `wxyz: 50` means to sample at (1 / 50) for WXYZ.
 const SAMPLE_RATES = { kuaf: 50, kuat: 20, redriver: 15 };
 const SILENCED = ["redriver", "will"];
 
-const retryStrategy = new ConfiguredRetryStrategy(
-  6, // Max attempts
-  (attempt) => 100 + attempt * 500,
-);
-
-const requestHandler = new NodeHttpHandler({
-  connectionTimeout: 1000,
-  requestTimeout: 2000,
-  socketTimeout: 500,
-});
-
-const ssm = new SSMClient({
-  apiVersion: "2014-11-06",
-  retryStrategy,
-  requestHandler,
-});
-
 const eventbridge = new EventBridgeClient();
 
-const ENV = process.env;
-
 /**
- * @param {number} min
- * @param {number} max
- * @returns {number}
- */
-function rand(min, max) {
-  const minCeiled = Math.ceil(min);
-  return Math.floor(
-    Math.random() * (Math.floor(max) - minCeiled + 1) + minCeiled,
-  );
-}
-
-async function initializeParams() {
-  console.log("Initializing SSM params");
-
-  return ssm.send(
-    new GetParametersCommand({
-      Names: [
-        ENV.DB_NAME_PARAMETER_ARN.split(":parameter")[1],
-        ENV.DB_USERNAME_PARAMETER_ARN.split(":parameter")[1],
-        ENV.DB_PASSWORD_PARAMETER_ARN.split(":parameter")[1],
-      ],
-      WithDecryption: true,
-    }),
-  );
-}
-
-const getParams = await initializeParams();
-
-/**
- * @param {any} event
+ * @param {TransferFamilyAuthorizerEvent} event
+ * @returns {Promise<TransferFamilyAuthorizerResult>}
  */
 export const handler = async (event) => {
-  console.log("Getting SSM parameters");
-  const params = getParams;
-  console.log("Done getting SSM parameters");
-
-  const dbConnectionParams = {
-    host: ENV.MYSQL_ENDPOINT,
-    database: params.Parameters.find((p) => p.ARN === ENV.DB_NAME_PARAMETER_ARN)
-      .Value,
-    user: params.Parameters.find((p) => p.ARN === ENV.DB_USERNAME_PARAMETER_ARN)
-      .Value,
-    password: params.Parameters.find(
-      (p) => p.ARN === ENV.DB_PASSWORD_PARAMETER_ARN,
-    ).Value,
-  };
+  redact(event);
 
   if (event.password?.length) {
     // Password-based authentication for FTP and SFTP
 
-    const isAuthed = await checkCredentials(
-      dbConnectionParams,
-      event.username,
-      event.password,
-    );
+    const isAuthed = await checkCredentials(event.username, event.password);
 
     if (isAuthed) {
       const isRateLimited = await checkRateLimit(event.username);
@@ -126,11 +62,11 @@ export const handler = async (event) => {
               ],
             }),
           );
-          console.log(
+          msg(
             `${event.username}: Password OK, rate limit DENIED, event sampled`,
           );
         } else {
-          console.log(
+          msg(
             `${event.username}: Password OK, rate limit DENIED, event NOT sampled`,
           );
         }
@@ -138,17 +74,17 @@ export const handler = async (event) => {
         return {}; // Returning an empty object here prevents the login
       }
 
-      console.log(`${event.username}: Password OK, rate limit OK`);
+      msg(`${event.username}: Password OK, rate limit OK`);
       return transferAuth(event.username, process.env.S3_BUCKET_ARN);
     } else {
-      console.log(`${event.username}: Password DENIED`);
+      msg(`${event.username}: Password DENIED`);
       return {};
     }
     // } else if (event.protocol === 'SFTP') {
     // Key-based authentication for SFTP
   } else {
     // Invalid authentication; do not return any policy
-    console.log(`${event.username}: Authentication method INVALID`);
+    msg(`${event.username}: Authentication method INVALID`);
     return {};
   }
 };

@@ -1,3 +1,5 @@
+/** @import { TransferFamilyAuthorizerResult } from "aws-lambda" */
+
 /**
  * @param {string} username
  * @param {string} bucketArn
@@ -36,7 +38,7 @@ function userPolicy(username, bucketArn) {
 /**
  * @param {string} username
  * @param {string} bucketArn
- * @returns {object}
+ * @returns {TransferFamilyAuthorizerResult}
  */
 export default function authorization(username, bucketArn) {
   const bucketName = bucketArn.split(":")[5];
