@@ -29,7 +29,7 @@ export function redact(event) {
     clone.password = "[REDACTED]";
   }
 
-  console.info(JSON.stringify({ clone }));
+  console.info(JSON.stringify({ event: clone }));
 }
 
 /**
