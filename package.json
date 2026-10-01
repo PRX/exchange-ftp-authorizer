@@ -12,13 +12,13 @@
     "url": "git://github.com/PRX/exchange-ftp-authorizer.git"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudwatch": "^3.1116.0",
-    "@aws-sdk/client-eventbridge": "^3.1116.0",
-    "@aws-sdk/client-s3": "^3.1116.0",
-    "@aws-sdk/client-ssm": "^3.1116.0",
+    "@aws-sdk/client-cloudwatch": "^3.1136.0",
+    "@aws-sdk/client-eventbridge": "^3.1136.0",
+    "@aws-sdk/client-s3": "^3.1136.0",
+    "@aws-sdk/client-ssm": "^3.1136.0",
     "@smithy/util-retry": "^4.6.2",
     "@smithy/node-http-handler": "^4.7.8",
-    "mysql2": "^3.23.4"
+    "mysql2": "^3.24.4"
   },
   "devDependencies": {
     "@biomejs/biome": "*",
